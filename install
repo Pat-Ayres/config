@@ -34,6 +34,7 @@ fonts_dir=${HOME}/.local/share/fonts
 wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/CascadiaCode.zip
 unzip CascadiaCode.zip -d "$fonts_dir"
 fc-cache -fv
+rm-rf CascadiaCode.zip
 
 echo "installing starship..."
 
@@ -50,10 +51,7 @@ echo "installing neovim..."
 git clone https://github.com/neovim/neovim
 cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo
 sudo make install # /usr/local
-
-echo "clone neovim config..."
-
-git clone git@github.com:Pat-Ayres/neovim-conf.git ${HOME}/.config/nvim
+rm -rf neovim
 
 echo "symlink dots..."
 
@@ -67,6 +65,7 @@ ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
 ln -sf ${SCRIPT_DIR}/gitconfig ${HOME}/.gitconfig
 ln -sf ${SCRIPT_DIR}/inputrc ${HOME}/.inputrc
 ln -sf ${SCRIPT_DIR}/kitty ${HOME}/.config/kitty
+ln -sf ${SCRIPT_DIR}/neovim-conf ${HOME}/.config/nvim
 ln -sf ${SCRIPT_DIR}/profile ${HOME}/.profile
 ln -sf ${SCRIPT_DIR}/ruby-version ${HOME}/.ruby-version
 ln -sf ${SCRIPT_DIR}/starship.toml ${HOME}/.config/starship.toml
