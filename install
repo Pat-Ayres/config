@@ -2,16 +2,20 @@
 
 set -e
 
+echo "switching to zsh..."
+
 ### ZSH ###
-chsh --shell "$(which zsh)" "$(whoami)"
+sudo chsh --shell "$(which zsh)" "$(whoami)"
 
 echo "Installing tooling..."
 
+echo "apt packages..."
+
 # make sure we're always up to date on package sources
-apt-get update
+sudo apt-get update
 
 ### APT PACKAGES ###
-apt-get install -y \
+sudo apt-get install -y \
   build-essential \
   cmake \
   curl \
@@ -19,8 +23,11 @@ apt-get install -y \
   ninja-build \
   perl \
   ripgrep \
-  tmux
-  unzip \
+  tmux \
+  unzip
+
+
+echo "installing fonts..."
 
 ### FONTS ###
 fonts_dir=${HOME}/.local/share/fonts
@@ -28,10 +35,14 @@ wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/CascadiaCo
 unzip CascadiaCode.zip -d "$fonts_dir"
 fc-cache -fv
 
+echo "installing starship..."
+
 ### STARSHIP ###
 # https://starship.rs/guide/#%F0%9F%9A%80-installation
 # this script does updates as well, so it can always run
-curl -sS https://starship.rs/install.sh | sh
+curl -sS https://starship.rs/install.sh | sudo sh
+
+echo "installing neovim..."
 
 ### NEOVIM ###
 # TODO: need python or ruby support?
@@ -39,6 +50,12 @@ curl -sS https://starship.rs/install.sh | sh
 git clone https://github.com/neovim/neovim
 cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo
 make install # /usr/local
+
+echo "clone neovim config..."
+
+git clone git@github.com:Pat-Ayres/neovim-conf.git ${HOME}/.config/nvim
+
+echo "symlink dots..."
 
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -50,7 +67,6 @@ ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
 ln -sf ${SCRIPT_DIR}/gitconfig ${HOME}/.gitconfig
 ln -sf ${SCRIPT_DIR}/inputrc ${HOME}/.inputrc
 ln -sf ${SCRIPT_DIR}/kitty ${HOME}/.config/kitty
-ln -sf ${SCRIPT_DIR}/nvim ${HOME}/.config/nvim
 ln -sf ${SCRIPT_DIR}/profile ${HOME}/.profile
 ln -sf ${SCRIPT_DIR}/ruby-version ${HOME}/.ruby-version
 ln -sf ${SCRIPT_DIR}/starship.toml ${HOME}/.config/starship.toml
