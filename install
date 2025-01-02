@@ -49,7 +49,7 @@ echo "installing neovim..."
 # build nightly from source
 git clone https://github.com/neovim/neovim
 cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo
-make install # /usr/local
+sudo make install # /usr/local
 
 echo "clone neovim config..."
 
