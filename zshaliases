@@ -1,0 +1,46 @@
+### NAVIGATION ###
+alias ...='cd ../..'
+alias .3='cd ../../..'
+alias dots='cd ~/src/dotfiles'
+
+### SUDO ###
+alias please='sudo'
+alias pleasecheckupdates='sudo apt update && apt list --upgradable'
+alias pleaseupgrade='sudo apt upgrade -y'
+
+### BINARIES ###
+alias k='kubectl'
+alias t='terraform'
+alias powershell='pwsh'
+alias python='python3'
+alias pip='pip3'
+
+# terraform
+alias tfpp='terraform plan -out=plan.out'
+alias tfap='terraform apply plan.out'
+
+### kubernetes stuff ###
+alias kge='kubectl get events --sort-by=".metadata.creationTimestamp"'
+
+### RUBY STUFF ###
+# rcc stands for (r)ubo(c)op (c)heck
+alias rcc="git ls-files -m '*.rb' | BUNDLE_GEMFILE=.overcommit/Gemfile xargs bundle exec rubocop"
+
+# shorthand for quick running individual files
+# e.g. `cop -a ./path/to/ugly.rb`
+alias cop="BUNDLE_GEMFILE=.overcommit/Gemfile bundle exec rubocop"
+
+alias panbio="bundle install --gemfile=.overcommit_gems.rb"
+
+### oh la la pictures ###
+alias icat='kitten icat --align=left'
+alias idot='dot -Efontsize=18 -Efontname=sans -Nfontname=sans -Tsvg \
+        -Gbgcolor=black -Gcolor=white -Ecolor=white -Efontcolor=white -Ncolor=white -Nfontcolor=white \
+    | magick -trim -bordercolor black -border 20 -transparent black -resize '80%' - - \
+    | icat'
+
+### ls -> eza ###
+alias ls='eza'
+alias l='eza -la'
+alias ll='eza -l'
+alias lsg='eza -l --git'

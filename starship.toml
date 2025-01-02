@@ -1,0 +1,35 @@
+[shell]
+disabled = false
+fish_indicator = "🐟"
+bash_indicator = "👊"
+zsh_indicator = "🧙"
+
+[kubernetes]
+disabled = false
+format = 'k8s [⛵$context( \($namespace\))](dimmed green) '
+[kubernetes.context_aliases]
+"kind-kind" = "local"
+
+[time]
+disabled = false
+format = '🕙[\[ $time \]]($style) '
+utc_time_offset = "-4"
+
+[helm]
+disabled = true
+
+[terraform]
+disabled = true
+
+[status]
+style = "bg:blue"
+symbol = "🔴"
+format = '[\[$symbol $status_common_meaning$status_signal_name$status_maybe_int\]]($style) '
+map_symbol = true
+disabled = false
+
+[gcloud]
+disabled = true
+
+[aws]
+disabled = true

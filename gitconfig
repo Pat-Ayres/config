@@ -1,0 +1,54 @@
+[core]
+	editor = nvim
+	pager = "diff-so-fancy | less --tabs=4 -RFX"
+[color]
+	ui = auto
+[color "branch"]
+	local = yellow
+	current = yellow reverse
+	remote = cyan bold
+[color "diff"]
+	frag = magenta bold
+	meta = cyan bold
+	new = green bold
+	old = red bold
+[color "status"]
+	changed = green bold
+	added = cyan bold
+	untracked = magenta bold
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	aa = add .
+	pn = push -u origin
+	pm = pull origin main
+	p = push
+	f = pull
+	cob = checkout -b
+	cm = checkout master
+	d = diff
+	rv = remote -v
+	please = push --force-with-lease
+	rbi = rebase -i origin/develop
+[user]
+	email = payres@panoramaed.com
+	name = Patrick Ayres
+[push]
+	default = simple
+[init]
+	defaultBranch = main
+[submodule]
+	recurse = true
+[status]
+	submodulesummary = true
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[pull]
+	rebase = true
