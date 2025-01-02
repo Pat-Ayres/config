@@ -34,7 +34,7 @@ fonts_dir=${HOME}/.local/share/fonts
 wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/CascadiaCode.zip
 unzip CascadiaCode.zip -d "$fonts_dir"
 fc-cache -fv
-rm-rf CascadiaCode.zip
+rm -rf CascadiaCode.zip
 
 echo "installing starship..."
 
