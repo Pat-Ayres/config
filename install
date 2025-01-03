@@ -2,37 +2,49 @@
 
 set -e
 
-LOCAL_BIN="${HOME}/bin"
-
-echo "switching to zsh..."
+LOCAL_BIN="${HOME}/.local/bin"
 
 ### ZSH ###
+echo "switching default shell to zsh..."
 sudo chsh --shell "$(which zsh)" "$(whoami)"
 
-echo "Installing tooling..."
+echo "install oh-my-zsh..."
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-echo "apt packages..."
+### RUSTBTW ###
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup install nightly
+cargo install --locked \
+  atuin \
+  bat \
+  eza \
+  ripgrep
 
-# make sure we're always up to date on package sources
-sudo apt-get update
+if command -v apt-get &> /dev/null; then
+  echo "installing apt packages..."
 
-### APT PACKAGES ###
-sudo apt-get install -y \
-  build-essential \
-  cmake \
-  curl \
-  gettext \
-  ninja-build \
-  perl \
-  ripgrep \
-  tmux \
-  unzip
+  # make sure we're always up to date on package sources
+  sudo apt-get update
 
+  sudo apt-get install -y \
+    build-essential \
+    cmake \
+    curl \
+    gettext \
+    ninja-build \
+    perl \
+    tmux \
+    unzip
+fi
 
-echo "installing fonts..."
 
 ### FONTS ###
-fonts_dir=${HOME}/.local/share/fonts
+echo "installing fonts..."
+FONTS_DIR=${HOME}/.local/share/fonts
+if [[ uname == "Darwin" ]]; then
+  FONTS_DIR=${HOME}/Library/Fonts
+fi
+
 wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/CascadiaCode.zip
 unzip CascadiaCode.zip -d "$fonts_dir"
 fc-cache -fv
