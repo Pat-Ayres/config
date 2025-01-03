@@ -2,6 +2,8 @@
 
 set -e
 
+LOCAL_BIN="${HOME}/bin"
+
 echo "switching to zsh..."
 
 ### ZSH ###
@@ -41,16 +43,15 @@ echo "installing starship..."
 ### STARSHIP ###
 # https://starship.rs/guide/#%F0%9F%9A%80-installation
 # this script does updates as well, so it can always run
-curl -sS https://starship.rs/install.sh | sudo sh
+curl -fsSL https://starship.rs/install.sh | sh -s -- --bin-dir $LOCAL_BIN --yes
 
 echo "installing neovim..."
 
 ### NEOVIM ###
-# TODO: need python or ruby support?
 # build nightly from source
 git clone https://github.com/neovim/neovim
-cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo
-sudo make install # /usr/local
+cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$LOCAL_BIN
+make install
 rm -rf neovim
 
 echo "symlink dots..."
