@@ -123,6 +123,4 @@ complete -C /usr/bin/terraform terraform
 eval "$(starship init bash)"
 export DOCKER_BUILDKIT=1
 export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
-export VOLTA_HOME="$HOME/.volta"
-export PATH="$VOLTA_HOME/bin:$PATH"
 eval "$(atuin init bash)"
