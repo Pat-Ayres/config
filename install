@@ -1,90 +1,130 @@
 #!/usr/bin/env bash
 
-set -e
+set -e  # Exit immediately if a command exits with a non-zero status
 
-LOCAL_BIN="${HOME}/.local/bin"
+# Detect the operating system
+detect_os() {
+    case "$(uname -s)" in
+        Linux)
+            echo "linux"
+            ;;
+        Darwin)
+            echo "macos"
+            ;;
+        *)
+            echo "unsupported"
+            ;;
+    esac
+}
 
-### ZSH ###
-echo "switching default shell to zsh..."
-sudo chsh --shell "$(which zsh)" "$(whoami)"
+brew_setup() {
+  # Check if Homebrew is installed
+  if ! command -v brew &> /dev/null; then
+    echo "Homebrew not found, installing..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
 
-echo "install oh-my-zsh..."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  echo "installing brew packages..."
 
-### RUSTBTW ###
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup install nightly
-cargo install --locked \
-  atuin \
-  bat \
-  eza \
-  ripgrep
+  echo "Brew setup completed."
+}
 
-if command -v apt-get &> /dev/null; then
-  echo "installing apt packages..."
+font_setup() {
+  echo "installing font..."
+  local fonts_dir
 
-  # make sure we're always up to date on package sources
-  sudo apt-get update
+  if [[ $OS == "linux" ]]; then
+    fonts_dir=${HOME}/.local/share/fonts
+  elif [[ $OS == "macos" ]]; then
+    fonts_dir=${HOME}/Library/Fonts
+  fi
 
-  sudo apt-get install -y \
-    build-essential \
-    cmake \
-    curl \
-    gettext \
-    ninja-build \
-    perl \
-    tmux \
-    unzip
-fi
+  wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/CascadiaCode.zip
+  unzip CascadiaCode.zip -d "$fonts_dir"
+  fc-cache -fv
+  rm -rf CascadiaCode.zip
+}
 
+zsh_setup() {
+  if ! command -v zsh; then
+    # TODO: install zsh if it is not already installed instead of skipping setup
+    echo "zsh not found, skipping setup..."
+    return
+  fi
 
-### FONTS ###
-echo "installing fonts..."
-FONTS_DIR=${HOME}/.local/share/fonts
-if [[ uname == "Darwin" ]]; then
-  FONTS_DIR=${HOME}/Library/Fonts
-fi
+  echo "installing oh-my-zsh..."
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/CascadiaCode.zip
-unzip CascadiaCode.zip -d "$fonts_dir"
-fc-cache -fv
-rm -rf CascadiaCode.zip
+  if [[ $SHELL != $(command -v zsh)]]; then
+    echo "switching default shell to zsh..."
+    sudo chsh --shell "$(which zsh)" "$(whoami)"
+  fi
+}
 
-echo "installing starship..."
+# Global setup function
+global_setup() {
+  echo "Starting global setup..."
 
-### STARSHIP ###
-# https://starship.rs/guide/#%F0%9F%9A%80-installation
-# this script does updates as well, so it can always run
-curl -fsSL https://starship.rs/install.sh | sh -s -- --bin-dir $LOCAL_BIN --yes
+  ### RUSTBTW ###
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  rustup install nightly
+  cargo install --locked \
+    atuin \
+    bat \
+    eza \
+    ripgrep
 
-echo "installing neovim..."
+  zsh_setup
+    
+  font_setup
 
-### NEOVIM ###
-# build nightly from source
-git clone https://github.com/neovim/neovim
-cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$LOCAL_BIN
-make install
-rm -rf neovim
+  echo "installing starship..."
+  curl -fsSL https://starship.rs/install.sh | sh -s -- --bin-dir $LOCAL_BIN --yes
 
-echo "symlink dots..."
+  echo "installing neovim..."
+  git clone https://github.com/neovim/neovim
+  cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$LOCAL_BIN
+  make install
+  rm -rf neovim
+
+  echo "symlinking dots..."
+  ln -sf ${SCRIPT_DIR}/bash_aliases ${HOME}/.bash_aliases
+  ln -sf ${SCRIPT_DIR}/bashrc ${HOME}/.bashrc
+  ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
+  ln -sf ${SCRIPT_DIR}/gitconfig ${HOME}/.gitconfig
+  ln -sf ${SCRIPT_DIR}/inputrc ${HOME}/.inputrc
+  ln -sf ${SCRIPT_DIR}/kitty ${HOME}/.config/kitty
+  ln -sf ${SCRIPT_DIR}/neovim-conf ${HOME}/.config/nvim
+  ln -sf ${SCRIPT_DIR}/profile ${HOME}/.profile
+  ln -sf ${SCRIPT_DIR}/ruby-version ${HOME}/.ruby-version
+  ln -sf ${SCRIPT_DIR}/starship.toml ${HOME}/.config/starship.toml
+  ln -sf ${SCRIPT_DIR}/tmux ${HOME}/.tmux
+  ln -sf ${SCRIPT_DIR}/tmux.conf ${HOME}/.tmux.conf
+  ln -sf ${SCRIPT_DIR}/zprofile ${HOME}/.zprofile
+  ln -sf ${SCRIPT_DIR}/zshaliases ${HOME}/.oh-my-zsh/custom/aliases.zsh
+  ln -sf ${SCRIPT_DIR}/zshenv ${HOME}/.zshenv
+  ln -sf ${SCRIPT_DIR}/zshrc ${HOME}/.zshrc
+
+  echo "Global setup completed."
+}
+
+# Main script logic
+main() {
+  LOCAL_BIN="${HOME}/.local/bin"
+  OS=$(detect_os)
+
+  if [[ $OS == "unsupported" ]]; then
+    echo "Unsupported operating system."
+    exit 1
+  fi
+
+  global_setup
+
+  echo "System bootstrap completed."
+}
 
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-### SYMLINKS ###
-ln -sf ${SCRIPT_DIR}/bash_aliases ${HOME}/.bash_aliases
-ln -sf ${SCRIPT_DIR}/bashrc ${HOME}/.bashrc
-ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
-ln -sf ${SCRIPT_DIR}/gitconfig ${HOME}/.gitconfig
-ln -sf ${SCRIPT_DIR}/inputrc ${HOME}/.inputrc
-ln -sf ${SCRIPT_DIR}/kitty ${HOME}/.config/kitty
-ln -sf ${SCRIPT_DIR}/neovim-conf ${HOME}/.config/nvim
-ln -sf ${SCRIPT_DIR}/profile ${HOME}/.profile
-ln -sf ${SCRIPT_DIR}/ruby-version ${HOME}/.ruby-version
-ln -sf ${SCRIPT_DIR}/starship.toml ${HOME}/.config/starship.toml
-ln -sf ${SCRIPT_DIR}/tmux ${HOME}/.tmux
-ln -sf ${SCRIPT_DIR}/tmux.conf ${HOME}/.tmux.conf
-ln -sf ${SCRIPT_DIR}/zprofile ${HOME}/.zprofile
-ln -sf ${SCRIPT_DIR}/zshaliases ${HOME}/.oh-my-zsh/custom/aliases.zsh
-ln -sf ${SCRIPT_DIR}/zshenv ${HOME}/.zshenv
-ln -sf ${SCRIPT_DIR}/zshrc ${HOME}/.zshrc
+# Execute the main function
+main

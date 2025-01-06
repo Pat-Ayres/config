@@ -21,6 +21,7 @@ alias tfap='terraform apply plan.out'
 
 ### kubernetes stuff ###
 alias kge='kubectl get events --sort-by=".metadata.creationTimestamp"'
+alias kcac='kubectl cost --service-port 9003 --service-name opencost --kubecost-namespace cost-allocation --allocation-path /allocation/compute'
 
 ### RUBY STUFF ###
 # rcc stands for (r)ubo(c)op (c)heck
