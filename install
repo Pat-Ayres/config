@@ -55,7 +55,7 @@ zsh_setup() {
   echo "installing oh-my-zsh..."
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-  if [[ $SHELL != $(command -v zsh)]]; then
+  if [[ "$SHELL" != "$(command -v zsh)" ]]; then
     echo "switching default shell to zsh..."
     sudo chsh --shell "$(which zsh)" "$(whoami)"
   fi
@@ -66,7 +66,9 @@ global_setup() {
   echo "Starting global setup..."
 
   ### RUSTBTW ###
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  if ! command -v rustup; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  fi
   rustup install nightly
   cargo install --locked \
     atuin \
