@@ -76,6 +76,7 @@ plugins=(
   terraform
 )
 
+
 # full brew completions
 # make sure this is above sourcing oh-my-zsh
 if type brew &>/dev/null
@@ -114,8 +115,10 @@ source $ZSH/oh-my-zsh.sh
 # pre-ohmyzsh zshrc stuffs
 eval "$(starship init zsh)"
 
-source $(brew --prefix)/opt/chruby/share/chruby/chruby.sh
-source $(brew --prefix)/opt/chruby/share/chruby/auto.sh
+if [[ -f $(brew --prefix)/opt/chruby/share/chruby/chruby.sh ]]; then
+  source $(brew --prefix)/opt/chruby/share/chruby/chruby.sh
+  source $(brew --prefix)/opt/chruby/share/chruby/auto.sh
+fi
 
 # make gnu-sed the default sed
 PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
@@ -136,4 +139,6 @@ export NVM_DIR="$HOME/.nvm"
 
 eval "$(atuin init zsh)"
 
-source /Users/payres/src/panorama/school-supplies/bin/shell_includes.sh
+if [[ -f ${PANORAMA_TOP}/school-supplies/bin/shell_includes.sh ]]; then
+  source ${PANORAMA_TOP}/school-supplies/bin/shell_includes.sh
+fi

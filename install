@@ -21,7 +21,7 @@ brew_setup() {
   # Check if Homebrew is installed
   if ! command -v brew &> /dev/null; then
     echo "Homebrew not found, installing..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
   echo "installing brew packages..."
@@ -53,7 +53,8 @@ zsh_setup() {
   fi
 
   echo "installing oh-my-zsh..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  # TODO: figure out how I want to handle scenario where oh-my-zsh is already installed
+  # sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
   if [[ "$SHELL" != "$(command -v zsh)" ]]; then
     echo "switching default shell to zsh..."
@@ -76,6 +77,8 @@ global_setup() {
     eza \
     ripgrep
 
+  brew_setup
+
   zsh_setup
     
   font_setup
@@ -83,16 +86,20 @@ global_setup() {
   echo "installing starship..."
   curl -fsSL https://starship.rs/install.sh | sh -s -- --bin-dir $LOCAL_BIN --yes
 
-  echo "installing neovim..."
-  git clone https://github.com/neovim/neovim
-  cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$LOCAL_BIN
-  make install
-  rm -rf neovim
+  if ! command -v nvim; then
+    echo "installing neovim..."
+    git clone https://github.com/neovim/neovim
+    cd neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$LOCAL_BIN
+    make install
+    rm -rf neovim
+  fi
+
+  go install github.com/jesseduffield/lazygit@latest
 
   echo "symlinking dots..."
   ln -sf ${SCRIPT_DIR}/bash_aliases ${HOME}/.bash_aliases
   ln -sf ${SCRIPT_DIR}/bashrc ${HOME}/.bashrc
-  ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
+  # ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
   ln -sf ${SCRIPT_DIR}/gitconfig ${HOME}/.gitconfig
   ln -sf ${SCRIPT_DIR}/inputrc ${HOME}/.inputrc
   ln -sf ${SCRIPT_DIR}/kitty ${HOME}/.config/kitty
