@@ -70,6 +70,8 @@ global_setup() {
   if ! command -v rustup; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   fi
+  # source rustup immediately to install nightly
+  . $HOME/.cargo/env
   rustup install nightly
   cargo install --locked \
     atuin \
