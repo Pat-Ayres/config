@@ -25,6 +25,7 @@ brew_setup() {
   fi
 
   echo "installing brew packages..."
+  brew bundle
 
   echo "Brew setup completed."
 }
