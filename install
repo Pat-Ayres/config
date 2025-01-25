@@ -92,7 +92,7 @@ global_setup() {
     bat \
     eza \
     ripgrep \
-    tree-sitter
+    tree-sitter-cli
 
   brew_setup
 
