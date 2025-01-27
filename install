@@ -22,10 +22,22 @@ brew_setup() {
   if ! command -v brew &> /dev/null; then
     echo "Homebrew not found, installing..."
     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    if [[ $OS == "linux" ]]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    elif [[ $OS == "macos" ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
+  fi
+
+  local brewfile="./Brewfile"
+  if [[ $OS == macos ]]; then
+    brewfile="./macos/Brewfile"
+  elif [[ $CODESPACES == "true" ]]; then
+    brewfile="./codespaces/Brewfile"
   fi
 
   echo "installing brew packages..."
-  brew bundle
+  brew bundle --file=$brewfile
 
   echo "Brew setup completed."
 }
