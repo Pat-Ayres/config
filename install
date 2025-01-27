@@ -118,8 +118,6 @@ global_setup() {
   echo "installing starship..."
   curl -fsSL https://starship.rs/install.sh | sh -s -- --bin-dir $LOCAL_BIN --yes
 
-  go install github.com/jesseduffield/lazygit@latest
-
   echo "symlinking dots..."
   ln -sf ${SCRIPT_DIR}/bash_aliases ${HOME}/.bash_aliases
   ln -sf ${SCRIPT_DIR}/bashrc ${HOME}/.bashrc
