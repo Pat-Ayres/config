@@ -13,7 +13,6 @@ format = 'k8s [⛵$context( \($namespace\))](dimmed green) '
 [time]
 disabled = false
 format = '🕙[\[ $time \]]($style) '
-utc_time_offset = "-4"
 
 [helm]
 disabled = true
