@@ -1,5 +1,8 @@
-# used by panorama dev env
-export PANORAMA_TOP=~/src/panorama
+# Don't overwrite PANORAMA_TOP if in codespace
+if [[ $CODESPACE != "true" ]]; then
+  # used by panorama dev env
+  export PANORAMA_TOP=~/src/panorama
+fi
 
 # use docker buildkit for caching etc
 export DOCKER_BUILDKIT=1
