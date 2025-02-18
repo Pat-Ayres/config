@@ -1,5 +1,5 @@
 # Don't overwrite PANORAMA_TOP if in codespace
-if [[ $CODESPACE != "true" ]]; then
+if [[ $CODESPACES != "true" ]]; then
   # used by panorama dev env
   export PANORAMA_TOP=~/src/panorama
 fi

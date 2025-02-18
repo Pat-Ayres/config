@@ -46,7 +46,7 @@ alias l='eza -la'
 alias ll='eza -l'
 alias lsg='eza -l --git'
 
-if [[ $CODESPACE != "true" ]]; then
+if [[ $CODESPACES != "true" ]]; then
   # hack to pass a working term into ssh when using
   # a terminal with custom terminfo like kitty or ghostty
   alias codespace="TERM=xterm-256color gh cs ssh"
