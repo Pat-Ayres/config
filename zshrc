@@ -142,3 +142,16 @@ eval "$(atuin init zsh)"
 if [[ -f ${PANORAMA_TOP}/school-supplies/bin/shell_includes.sh ]]; then
   source ${PANORAMA_TOP}/school-supplies/bin/shell_includes.sh
 fi
+
+if [[ $CODESPACES == "true" ]]; then
+  # For some reason codespaces has $SHELL set to bash even though my default shell is set to zsh, and the active shell is zsh.
+  # This breaks a bunch of stuff, and I don't know why it is happening. A workaround seems to be to force update the shell env var.
+  # Using `readlink` here sets the shell to the absolute path of the currently running shell, so that things relying on $SHELL work
+  # correctly again.
+  export SHELL="$(readlink /proc/$$/exe)"
+
+  # Some repos have an additional rcfile set up for dev tooling in codespaces. Source it if it exists.
+  if [[ -f $HOME/.panoramarc ]]; then
+    source $HOME/.panoramarc
+  fi
+fi
