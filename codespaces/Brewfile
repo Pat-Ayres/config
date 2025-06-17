@@ -1,7 +1,5 @@
 tap "aws/tap"
 tap "hashicorp/tap"
-tap "homebrew/bundle"
-tap "homebrew/services"
 tap "jesseduffield/lazygit"
 brew "automake"
 brew "openssl@3"

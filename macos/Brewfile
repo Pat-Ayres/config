@@ -1,8 +1,6 @@
 tap "aws/tap"
 tap "hashicorp/tap"
 tap "heroku/brew"
-tap "homebrew/bundle"
-tap "homebrew/services"
 tap "jesseduffield/lazygit"
 tap "noovolari/brew"
 tap "weaveworks/tap"
