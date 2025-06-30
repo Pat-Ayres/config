@@ -7,8 +7,9 @@ zsh_indicator = "🧙"
 [kubernetes]
 disabled = false
 format = 'k8s [⛵$context( \($namespace\))](dimmed green) '
-[kubernetes.context_aliases]
-"kind-kind" = "local"
+contexts = [
+  { context_pattern = "kind.kind", context_alias = "local" }
+]
 
 [time]
 disabled = false
