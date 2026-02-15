@@ -16,8 +16,26 @@ alias python='python3'
 alias pip='pip3'
 
 # terraform
+alias tf='terraform'
+alias tfi='terraform init'
+alias tfp='terraform plan'
+alias tfa='terraform apply'
+alias tfd='terraform destroy'
+alias tfsh='terraform show'
+alias tfw='terraform workspace'
 alias tfpp='terraform plan -out=plan.out'
 alias tfap='terraform apply plan.out'
+
+# aws
+alias asp='export AWS_PROFILE'
+alias agp='echo $AWS_PROFILE'
+
+# git shortcuts (extracted from oh-my-zsh git plugin)
+alias gst='git status'
+alias gd='git diff'
+alias gp='git push'
+alias gl='git pull'
+alias gco='git checkout'
 
 ### kubernetes stuff ###
 alias kge='kubectl get events --sort-by=".metadata.creationTimestamp"'

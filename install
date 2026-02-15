@@ -23,7 +23,11 @@ brew_setup() {
   # Check if Homebrew is installed
   if ! command -v brew &> /dev/null; then
     echo "Homebrew not found, installing..."
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    if [[ $CODESPACES == "true" ]]; then
+      NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    else
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
     if [[ $operating_system == "linux" ]]; then
       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
     elif [[ $operating_system == "macos" ]]; then
@@ -96,6 +100,25 @@ neovim_setup() {
   fi
 }
 
+symlink_dotfiles() {
+  echo "symlinking dots..."
+  ln -sf ${SCRIPT_DIR}/bash_aliases ${HOME}/.bash_aliases
+  ln -sf ${SCRIPT_DIR}/bashrc ${HOME}/.bashrc
+  # ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
+  ln -sf ${SCRIPT_DIR}/gitconfig ${HOME}/.gitconfig
+  ln -sf ${SCRIPT_DIR}/inputrc ${HOME}/.inputrc
+  ln -sf ${SCRIPT_DIR}/kitty ${HOME}/.config/kitty
+  ln -sf ${SCRIPT_DIR}/profile ${HOME}/.profile
+  ln -sf ${SCRIPT_DIR}/ruby-version ${HOME}/.ruby-version
+  ln -sf ${SCRIPT_DIR}/starship.toml ${HOME}/.config/starship.toml
+  ln -sf ${SCRIPT_DIR}/tmux ${HOME}/.tmux
+  ln -sf ${SCRIPT_DIR}/tmux.conf ${HOME}/.tmux.conf
+  ln -sf ${SCRIPT_DIR}/zprofile ${HOME}/.zprofile
+  ln -sf ${SCRIPT_DIR}/zshaliases ${HOME}/.zshaliases
+  ln -sf ${SCRIPT_DIR}/zshenv ${HOME}/.zshenv
+  ln -sf ${SCRIPT_DIR}/zshrc ${HOME}/.zshrc
+}
+
 # Global setup function
 global_setup() {
   echo "Starting global setup..."
@@ -129,22 +152,7 @@ global_setup() {
   echo "installing starship..."
   curl -fsSL https://starship.rs/install.sh | sh -s -- --bin-dir $LOCAL_BIN --yes
 
-  echo "symlinking dots..."
-  ln -sf ${SCRIPT_DIR}/bash_aliases ${HOME}/.bash_aliases
-  ln -sf ${SCRIPT_DIR}/bashrc ${HOME}/.bashrc
-  # ln -sf ${SCRIPT_DIR}/ghostty ${HOME}/.config/ghostty
-  ln -sf ${SCRIPT_DIR}/gitconfig ${HOME}/.gitconfig
-  ln -sf ${SCRIPT_DIR}/inputrc ${HOME}/.inputrc
-  ln -sf ${SCRIPT_DIR}/kitty ${HOME}/.config/kitty
-  ln -sf ${SCRIPT_DIR}/profile ${HOME}/.profile
-  ln -sf ${SCRIPT_DIR}/ruby-version ${HOME}/.ruby-version
-  ln -sf ${SCRIPT_DIR}/starship.toml ${HOME}/.config/starship.toml
-  ln -sf ${SCRIPT_DIR}/tmux ${HOME}/.tmux
-  ln -sf ${SCRIPT_DIR}/tmux.conf ${HOME}/.tmux.conf
-  ln -sf ${SCRIPT_DIR}/zprofile ${HOME}/.zprofile
-  ln -sf ${SCRIPT_DIR}/zshaliases ${HOME}/.oh-my-zsh/custom/aliases.zsh
-  ln -sf ${SCRIPT_DIR}/zshenv ${HOME}/.zshenv
-  ln -sf ${SCRIPT_DIR}/zshrc ${HOME}/.zshrc
+  symlink_dotfiles
 
   echo "Global setup completed."
 }
