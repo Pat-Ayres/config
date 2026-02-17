@@ -15,10 +15,6 @@ export DISABLE_AUTO_TILE='true'
 
 ### PATH STUFF ###
 
-if [[ "$(uname)" == "Linux" ]]; then
-  export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
-fi
-
 # put vscode in path for cli to work
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
