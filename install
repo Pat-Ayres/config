@@ -52,7 +52,6 @@ symlink_dotfiles() {
   ln -sf ${SCRIPT_DIR}/profile ${HOME}/.profile
   ln -sf ${SCRIPT_DIR}/ruby-version ${HOME}/.ruby-version
   ln -sf ${SCRIPT_DIR}/starship.toml ${HOME}/.config/starship.toml
-  ln -sf ${SCRIPT_DIR}/tmux ${HOME}/.tmux
   ln -sf ${SCRIPT_DIR}/tmux.conf ${HOME}/.tmux.conf
   ln -sf ${SCRIPT_DIR}/zprofile ${HOME}/.zprofile
   ln -sf ${SCRIPT_DIR}/zshaliases ${HOME}/.zshaliases
