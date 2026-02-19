@@ -1,5 +1,6 @@
 [core]
 	editor = nvim
+	pager = diffnav
 [color]
 	ui = auto
 [color "branch"]

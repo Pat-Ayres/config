@@ -15,15 +15,20 @@ export DISABLE_AUTO_TILE='true'
 
 ### PATH STUFF ###
 
-# put vscode in path for cli to work
-export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+if [[ $(uname -s) == "Darwin" ]]; then
+  # put vscode in path for cli to work
+  export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+
+  # DEPRECATED: LEGACY SUPPORT ONLY
+  # add personal scripts to path
+  export PATH="$PATH:/Users/payres/bin"
+fi
 
 # prefer local bin
 export PATH="$HOME/.local/bin:$PATH"
 
-# DEPRECATED: LEGACY SUPPORT ONLY
-# add personal scripts to path
-export PATH="$PATH:/Users/payres/bin"
+# go tools
+export PATH="$HOME/go/bin:$PATH"
 
 # add krew to path
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
