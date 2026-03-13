@@ -57,8 +57,6 @@ take() { mkdir -p "$1" && cd "$1" }
 # Aliases
 source ~/.zshaliases
 
-# Terraform completions
-complete -o nospace -C terraform terraform 2>/dev/null || true
 
 eval "$(starship init zsh)"
 
@@ -104,3 +102,6 @@ if [[ $CODESPACES == "true" ]]; then
     source $HOME/.panoramarc
   fi
 fi
+
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /Users/payres/.tenv/OpenTofu/1.6.2/tofu tofu

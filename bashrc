@@ -118,7 +118,6 @@ eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 . "$HOME/.cargo/env"
 
-complete -C /usr/bin/terraform terraform
 
 eval "$(starship init bash)"
 export DOCKER_BUILDKIT=1

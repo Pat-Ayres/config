@@ -9,7 +9,7 @@ alias pleaseupgrade='sudo apt upgrade -y'
 
 # BINARIES
 alias k='kubectl'
-alias t='terraform'
+alias t='tofu'
 alias powershell='pwsh'
 alias python='python3'
 alias pip='pip3'
