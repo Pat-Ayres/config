@@ -13,7 +13,7 @@ SAVEHIST=50000
 setopt HIST_IGNORE_ALL_DUPS SHARE_HISTORY HIST_VERIFY
 
 # Shell options
-setopt AUTO_CD COMPLETE_IN_WORD ALWAYS_TO_END
+setopt AUTO_CD COMPLETE_IN_WORD ALWAYS_TO_END AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_MINUS
 
 # Key bindings: vim mode with useful Ctrl shortcuts preserved
 bindkey -v
