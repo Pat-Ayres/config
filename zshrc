@@ -17,12 +17,30 @@ setopt AUTO_CD COMPLETE_IN_WORD ALWAYS_TO_END
 
 # Key bindings: vim mode with useful Ctrl shortcuts preserved
 bindkey -v
-export KEYTIMEOUT=1    # 10ms Esc timeout (default is 400ms — sluggish)
-bindkey '^A' beginning-of-line
-bindkey '^E' end-of-line
-bindkey '^K' kill-line
-bindkey '^W' backward-kill-word
-bindkey '^L' clear-screen
+export KEYTIMEOUT=1   # 10ms Esc timeout (default is 400ms - sluggish)
+
+# Bind in both viins and vicmd so Ctrl shortcuts work in either mode
+for keymap in viins vicmd; do
+  bindkey -M $keymap '^A' beginning-of-line
+  bindkey -M $keymap '^E' end-of-line
+  bindkey -M $keymap '^K' kill-line
+  bindkey -M $keymap '^W' backward-kill-word
+  bindkey -M $keymap '^L' clear-screen
+  bindkey -M $keymap '^P' up-line-or-history
+  bindkey -M $keymap '^N' down-line-or-history
+  bindkey -M $keymap '^F' forward-char
+  bindkey -M $keymap '^B' backward-char
+done
+
+# Ensure arrow keys, delete, home, end work in vi insert mode
+bindkey -M viins '^[[A' up-line-or-history
+bindkey -M viins '^[[B' down-line-or-history
+bindkey -M viins '^[[C' forward-char
+bindkey -M viins '^[[D' backward-char
+bindkey -M viins '^[[H' beginning-of-line
+bindkey -M viins '^[[F' end-of-line
+bindkey -M viins '^[[3~' delete-char
+bindkey -M viins '^?' backward-delete-char
 
 # Colored man pages (replaces colored-man-pages plugin)
 export LESS_TERMCAP_mb=$'\e[1;32m'
