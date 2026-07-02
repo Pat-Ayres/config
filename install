@@ -57,6 +57,60 @@ symlink_dotfiles() {
   ln -sf ${SCRIPT_DIR}/zshaliases ${HOME}/.zshaliases
   ln -sf ${SCRIPT_DIR}/zshenv ${HOME}/.zshenv
   ln -sf ${SCRIPT_DIR}/zshrc ${HOME}/.zshrc
+
+  mkdir -p "${HOME}/.local/bin"
+  ln -sf "${SCRIPT_DIR}/bin/agent-notify" "${HOME}/.local/bin/agent-notify"
+  ln -sf "${SCRIPT_DIR}/bin/cursor-shell-gate" "${HOME}/.local/bin/cursor-shell-gate"
+}
+
+merge_claude_hooks() {
+  local settings="${1:-$HOME/.claude/settings.json}"
+  # shellcheck disable=SC2016  # literal $HOME: expanded at hook-run time, not install time
+  local bin='$HOME/.local/bin/agent-notify'
+  mkdir -p "$(dirname "$settings")"
+  [ -f "$settings" ] || echo '{}' > "$settings"
+  local tmp
+  tmp="$(mktemp)"
+  jq \
+    --arg notif "$bin approval claude" \
+    --arg stop  "$bin complete claude" \
+    '.hooks = (.hooks // {})
+     | .hooks.Notification = [ { "hooks": [ { "type": "command", "command": $notif } ] } ]
+     | .hooks.Stop         = [ { "hooks": [ { "type": "command", "command": $stop  } ] } ]' \
+    "$settings" > "$tmp" && mv "$tmp" "$settings"
+  echo "merged Claude hooks into $settings"
+}
+
+write_cursor_hooks() {
+  local target="${1:-$HOME/.cursor/hooks.json}"
+  # shellcheck disable=SC2016  # literal $HOME: expanded at hook-run time, not install time
+  local gate='$HOME/.local/bin/cursor-shell-gate'
+  # shellcheck disable=SC2016  # literal $HOME: expanded at hook-run time, not install time
+  local notify='$HOME/.local/bin/agent-notify'
+  mkdir -p "$(dirname "$target")"
+  cat > "$target" <<EOF
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [ { "command": "$gate" } ],
+    "beforeMCPExecution": [ { "command": "$gate" } ],
+    "stop": [ { "command": "sh -c 'test \"\$(jq -r .status)\" = completed && $notify complete cursor || true'" } ]
+  }
+}
+EOF
+  echo "wrote cursor hooks to $target"
+}
+
+linux_setup() {
+  local missing=0
+  command -v jq >/dev/null 2>&1 || { echo "WARN: jq missing (pacman -S jq)"; missing=1; }
+  command -v notify-send >/dev/null 2>&1 || { echo "WARN: notify-send missing (pacman -S libnotify)"; missing=1; }
+  if ! command -v pw-play >/dev/null 2>&1 \
+     && ! command -v paplay >/dev/null 2>&1 \
+     && ! command -v canberra-gtk-play >/dev/null 2>&1; then
+    echo "WARN: no audio player (pacman -S pipewire libcanberra)"; missing=1
+  fi
+  [ "$missing" -eq 0 ] && echo "linux notification deps OK"
 }
 
 # Main script logic
@@ -71,10 +125,18 @@ main() {
     brew_setup
   fi
 
+  if [[ $operating_system == "linux" ]]; then
+    linux_setup
+  fi
+
   neovim_config_setup
   symlink_dotfiles
+  merge_claude_hooks
+  write_cursor_hooks
 
   echo "Config install completed."
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main
+fi

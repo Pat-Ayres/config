@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# agent-notify — differentiated notifications for coding-agent CLIs.
+# Usage: agent-notify <approval|complete> [app]
+# Best-effort: always exits 0 so it can never wedge a calling hook.
+set -u
+
+event="${1:-}"
+app="${2:-agent}"
+
+case "$event" in
+  approval)
+    macos_sound="/System/Library/Sounds/Sosumi.aiff"
+    fd_sound="dialog-warning"
+    urgency="critical"
+    title="🔴 Needs approval — ${app}"
+    body="Waiting for your input."
+    ;;
+  complete)
+    macos_sound="/System/Library/Sounds/Glass.aiff"
+    fd_sound="complete"
+    urgency="normal"
+    title="✅ Done — ${app}"
+    body="Operation finished."
+    ;;
+  *)
+    echo "usage: agent-notify <approval|complete> [app]" >&2
+    exit 0
+    ;;
+esac
+
+# 0. Suppress entirely when the target pane's window is already on-screen (the
+# active window of its session). If you're looking at it, a chime/banner about
+# it is just noise; it still fires for a window you've switched away from.
+if [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ]; then
+  if [ "$(tmux display-message -p -t "$TMUX_PANE" '#{window_active}' 2>/dev/null)" = "1" ]; then
+    exit 0
+  fi
+fi
+
+# 1. tmux window state (portable)
+if [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ]; then
+  tmux set-option -w -t "$TMUX_PANE" @notify_state "$event" 2>/dev/null || true
+fi
+
+# 2. audio (backgrounded, best-effort)
+play_sound() {
+  case "$(uname -s)" in
+    Darwin)
+      [ -r "$macos_sound" ] && afplay "$macos_sound"
+      ;;
+    Linux)
+      if command -v canberra-gtk-play >/dev/null 2>&1; then
+        canberra-gtk-play -i "$fd_sound"
+      elif command -v pw-play >/dev/null 2>&1; then
+        pw-play "/usr/share/sounds/freedesktop/stereo/${fd_sound}.oga"
+      elif command -v paplay >/dev/null 2>&1; then
+        paplay "/usr/share/sounds/freedesktop/stereo/${fd_sound}.oga"
+      fi
+      ;;
+  esac
+}
+play_sound >/dev/null 2>&1 &
+
+# 3. desktop banner (best-effort)
+case "$(uname -s)" in
+  Darwin)
+    if command -v osascript >/dev/null 2>&1; then
+      osascript -e "display notification \"${body}\" with title \"${title}\"" >/dev/null 2>&1 || true
+    fi
+    ;;
+  Linux)
+    if command -v notify-send >/dev/null 2>&1; then
+      notify-send -a "$app" -u "$urgency" "$title" "$body" >/dev/null 2>&1 || true
+    fi
+    ;;
+esac
+
+exit 0
