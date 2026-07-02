@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# cursor-shell-gate — cursor beforeShellExecution / beforeMCPExecution gate.
+# Reads cursor's hook JSON on stdin, decides allow vs ask against an ask-list,
+# fires an approval notification when asking, prints the permission JSON.
+# Best-effort: always exits 0.
+#
+# EDIT THIS LIST to tune which commands require approval (Option A: this gate
+# is cursor's shell-approval policy). Everything not matched is allowed silently.
+set -u
+
+AGENT_NOTIFY_BIN="${AGENT_NOTIFY_BIN:-$HOME/.local/bin/agent-notify}"
+
+payload="$(cat)"
+cmd="$(printf '%s' "$payload" | jq -r '.command // .tool_input.command // .args.command // empty' 2>/dev/null)"
+[ -z "$cmd" ] && cmd="$payload"
+
+ask_patterns=(
+  'rm '
+  'sudo '
+  'git push'
+  'git reset --hard'
+  'git clean -'
+  '| sh'
+  '| bash'
+  'dd '
+  'mkfs'
+  ':(){'
+  '> /etc/'
+  'chmod -R'
+  'chown -R'
+)
+
+# True if $2 (a pattern) appears in $1 (the command) at a word boundary —
+# preceded by start-of-string or a non-alphanumeric character. Prevents
+# benign words that merely contain a pattern as a substring (e.g. "xterm"
+# containing "rm ", "perform" containing "rm ") from triggering a match.
+matches() {
+  local hay=" $1" needle="$2"
+  case "$hay" in
+    *[!a-zA-Z0-9]"$needle"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+decision="allow"
+for p in "${ask_patterns[@]}"; do
+  if matches "$cmd" "$p"; then
+    decision="ask"
+    break
+  fi
+done
+
+if [ "$decision" = "ask" ]; then
+  "$AGENT_NOTIFY_BIN" approval cursor >/dev/null 2>&1 || true
+fi
+
+printf '{"permission":"%s"}\n' "$decision"
+exit 0
