@@ -270,3 +270,51 @@ Rationale (verified 2026-07-01):
 - Remove the `hooks` block from `~/.claude/settings.json` and delete `~/.cursor/hooks.json`.
 - Remove the `agent-notify` symlink and `bin/agent-notify`.
 All changes are additive and individually reversible.
+
+---
+
+## Addendum (2026-07-02) — changes from the original design
+
+Live verification on macOS changed several decisions above. The body of this
+document is the original design; this addendum records what actually shipped.
+
+1. **Palette is colorblind-safe, not red/green.** The user is red-green
+   colorblind, for which red (approval) / green (complete) is the worst possible
+   pairing. Shipped palette: **approval = orange, complete = cyan** — a pair that
+   stays distinguishable across the common colorblindness types.
+
+2. **No blink; a symbol marker carries urgency instead.** A blinking status entry
+   rendered steady in testing. The root cause was not isolated — it could be
+   Ghostty, tmux, or config — so rather than chase it or fall back to `reverse`,
+   the design simply does not depend on blink. Each state shows a **symbol** —
+   `‼` for approval, `✓` for complete — so it reads without depending on hue or
+   motion, which also matters for the colorblindness.
+
+3. **On-screen notifications are fully suppressed.** The "Error handling" note
+   called active-pane suppression an optional non-MVP refinement; live use proved
+   it essential (the `Stop` hook fired a chime + banner on every turn while the
+   user was watching the agent window). `agent-notify` now exits early — no state,
+   sound, or banner — when its target pane's window is the **active window of its
+   session** (`#{window_active}`). Notifications still fire for a window the user
+   has switched away from.
+   - **Known limitation:** this is tmux-window-based. If the terminal app itself
+     is unfocused (user switched to another macOS app) while the agent's window
+     is still the active tmux window, the notification is suppressed — tmux cannot
+     observe terminal-app focus. Acceptable for a window-switching workflow.
+
+4. **Cursor ask-list uses word-boundary matching.** The gate matches ask-patterns
+   at a left word boundary (start-of-string or a non-alphanumeric char), not raw
+   substring, so benign commands that merely contain a pattern (`xterm` → `rm `,
+   `add data` → `dd `) do not trigger a false `ask`.
+
+5. **Cursor `stop` hook always exits 0** (`... && notify || true`), honoring the
+   best-effort constraint even when status is `aborted`/`error`. Cursor's hook
+   schema (Risk #3) was verified against the docs: stdin `.command`, output
+   `{"permission":"allow"|"ask"}`, stop `.status` — all match.
+
+6. **Theme prerequisite.** `tokyo-night-tmux` was declared in `tmux.conf` but had
+   never been fetched on this machine (TPM only installs on `prefix + I`), so the
+   status bar fell back to tmux's default green. Installing the plugin is a
+   prerequisite for the intended appearance. Its right-side widgets default OFF;
+   `datetime` and `battery` are now enabled explicitly, and
+   `@tokyo-night-tmux_transparent 0` is set to silence a stderr warning.
