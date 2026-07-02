@@ -27,13 +27,29 @@ apart. The fix is to stop guessing from bytes and instead let each app emit a
 - Two channels: **in-tmux** (color-coded window highlight + chime while looking at
   the session) and **macOS banner + dock bounce** (when the terminal is unfocused).
 - Work symmetrically for both Claude Code and cursor-agent CLIs running in tmux panes.
+- Work on **both macOS (work) and Linux/CachyOS (personal)** from the same repo.
 - Manage cleanly in the dotfiles repo without clobbering existing/enterprise settings.
+
+## Platform support
+
+Targets: **macOS** and **Linux (CachyOS — Arch-based, PipeWire, libnotify)**. Windows is
+out of scope. The tmux layer is portable as-is. Only two actions are platform-specific —
+**audio** and **the desktop banner** — so the dispatcher isolates them behind two shell
+functions (`play_sound`, `send_banner`) that branch on `uname -s`. Everything else is
+shared.
+
+| Action | macOS | Linux (CachyOS) |
+|---|---|---|
+| play sound | `afplay <file>` | `pw-play` → `paplay` → `canberra-gtk-play -i <id>` (first available) |
+| desktop banner | `osascript -e 'display notification …'` | `notify-send -u <urgency> -a <app> <title> <body>` |
+| dep manager | Homebrew (`Brewfile`) | pacman (documented; soft runtime check) |
 
 ## Non-goals
 
 - No routing notifications *through* Ghostty (OSC 9/777 + tmux passthrough). Hooks are
-  shell scripts with full system access, so they act directly (`afplay`, `osascript`,
-  `tmux`). Ghostty stays a passive display surface.
+  shell scripts with full system access, so they act directly via the platform's own
+  tools (`afplay`/`osascript` on macOS, `pw-play`/`notify-send` on Linux, `tmux` on
+  both). Ghostty stays a passive display surface.
 - No general-purpose notification framework. Two event types only (YAGNI).
 - No handling of Cursor the GUI IDE — CLI (`cursor-agent`) only.
 
@@ -57,13 +73,23 @@ an event type; the script performs all three output actions.
   - `app` ∈ `{claude, cursor}` (optional, for banner labeling; default `agent`)
 - **Environment it reads:** `$TMUX`, `$TMUX_PANE` (inherited from the pane the CLI runs
   in — this is how it targets the right window).
+- **Structure:** a shared entry point plus two platform-branched helpers,
+  `play_sound <event>` and `send_banner <event> <app>`, selected once via `uname -s`.
 - **Behavior:**
-  1. **tmux visual** — if `$TMUX` is set:
+  1. **tmux visual** (portable) — if `$TMUX` is set:
      `tmux set-option -w -t "$TMUX_PANE" @notify_state "$event"`
      (`-w` sets the window *containing* that pane).
      If `$TMUX` is unset, skip silently.
-  2. **audio** — `afplay "<sound-for-event>" &` (backgrounded so the hook never blocks).
-  3. **OS banner** — `osascript -e 'display notification …'` with a per-event title.
+  2. **audio** (`play_sound`, backgrounded so the hook never blocks):
+     - **macOS:** `afplay "<sound-for-event>" &`
+     - **Linux:** first available of `pw-play` / `paplay` (on a sound file) or
+       `canberra-gtk-play -i "<event-sound-id>"` (freedesktop theme lookup). If none
+       present, skip audio silently.
+  3. **OS banner** (`send_banner`):
+     - **macOS:** `osascript -e 'display notification …'` with a per-event title.
+     - **Linux:** `notify-send -a "<app>" -u <urgency> "<title>" "<body>"`
+       (`-u critical` for approval so it persists until dismissed; `-u normal` for
+       complete). If `notify-send` is absent, skip banner silently.
 - **Failure policy:** each action is independent and best-effort; a missing `$TMUX` or a
   failed `afplay` must not abort the others and must not return non-zero to the caller
   (a failing hook must never wedge the agent). Let real errors surface in logs, but do
@@ -71,13 +97,25 @@ an event type; the script performs all three output actions.
 
 ### Component 2 — Sensory mapping
 
-| Event | tmux color | Motion | macOS sound | Banner title |
-|---|---|---|---|---|
-| **approval** | red / orange | blink | `Sosumi` (sharp) | `🔴 Needs approval — <app>` |
-| **complete** | green | steady | `Glass` (soft) | `✅ Done — <app>` |
+| Event | tmux color | Motion | macOS sound | Linux sound (freedesktop id) | Banner title | Linux urgency |
+|---|---|---|---|---|---|---|
+| **approval** | red / orange | blink | `Sosumi` (sharp) | `dialog-warning` | `🔴 Needs approval — <app>` | `critical` |
+| **complete** | green | steady | `Glass` (soft) | `complete` | `✅ Done — <app>` | `normal` |
 
-Sounds are `/System/Library/Sounds/<name>.aiff`. Colors and sounds are single-line
-constants in the script, trivially editable.
+**Sound strategy — per-OS native (chosen).** macOS uses its system sounds
+(`/System/Library/Sounds/<name>.aiff`); Linux uses freedesktop theme sounds
+(`/usr/share/sounds/freedesktop/stereo/<id>.oga`, or by id via `canberra-gtk-play -i`).
+The exact *timbre* differs between machines, but the **semantic contrast is preserved**
+on each: sharp/urgent for approval, soft for complete. This avoids shipping binary audio
+in the repo and depending on a sound theme being present cross-platform.
+
+  *Alternative considered:* ship two identical WAV files in `sounds/` and play them on
+  both OSes for byte-identical sound everywhere. Rejected for MVP (adds binaries, and
+  identical cross-machine timbre isn't a stated requirement). Easy to switch to later —
+  only `play_sound` changes.
+
+Colors, sound names/ids, and urgencies are single-line constants in the script,
+trivially editable per platform.
 
 ### Component 3 — `tmux.conf` changes
 
@@ -156,13 +194,21 @@ Rationale (verified 2026-07-01):
 **Approach:**
 - `symlink_dotfiles` in `install`: add
   `ln -sf ${SCRIPT_DIR}/bin/agent-notify ${HOME}/.local/bin/agent-notify`
-  (creating `~/.local/bin` if needed).
+  (creating `~/.local/bin` if needed). Portable across both OSes.
 - Add an idempotent **`jq` merge** step (new function in `install`) that injects the
   notify `hooks` block into `~/.claude/settings.json`, preserving all existing keys, and
   creates/merges `~/.cursor/hooks.json`. Re-running `install` re-merges without
-  duplicating.
-- `osascript` and `afplay` are macOS built-ins — no Brewfile additions required.
-- The tmux change ships via the already-symlinked `tmux.conf`.
+  duplicating. `jq` itself is the only hard install-time dependency.
+- **Dependencies by platform:**
+  - **macOS:** `osascript` + `afplay` are built in; only `jq` is needed (add to
+    `macos/Brewfile` if not already present).
+  - **Linux/CachyOS:** needs `jq`, `libnotify` (`notify-send`), and a PipeWire/Pulse
+    player (`pipewire`/`pipewire-pulse` provide `pw-play`/`paplay`; `libcanberra`
+    provides `canberra-gtk-play`). Document the pacman package names; the existing
+    `detect_os` already branches, so add a `linux_setup()` that **checks** for these and
+    prints a warning if missing (non-invasive — no auto `sudo pacman`). The dispatcher
+    also degrades gracefully at runtime if a tool is absent.
+- The tmux change ships via the already-symlinked `tmux.conf` (portable).
 
 ## State lifecycle
 
@@ -195,6 +241,11 @@ Rationale (verified 2026-07-01):
    whole entry.
 3. **cursor `beforeShellExecution` output schema** — confirm exact JSON keys for the
    allow/ask decision.
+4. **Linux (CachyOS) tooling** — confirm on the actual machine which audio player is
+   present/works (`pw-play` vs `paplay` vs `canberra-gtk-play`), that the freedesktop
+   `dialog-warning`/`complete` sounds resolve, and that the notification daemon honors
+   `-u critical` (persist-until-dismissed) under the running desktop environment. This
+   Mac can't verify the Linux path — it's checked when installing on CachyOS.
 
 ## Testing plan
 
@@ -202,6 +253,9 @@ Rationale (verified 2026-07-01):
   red/blink window highlight + Sosumi + banner; switch to the window → verify it clears.
   Repeat `agent-notify complete claude` → green/steady + Glass + banner.
 - **No-tmux:** run outside tmux → verify sound + banner, no error.
+- **Cross-platform:** run the same manual checks on CachyOS → verify `notify-send`
+  banner (approval persists under `critical`, complete auto-expires) and the selected
+  audio player fires; verify graceful skip if a tool is missing.
 - **Claude end-to-end:** trigger a real permission prompt (approval) and a real response
   end (complete); verify each fires the right notification.
 - **Cursor end-to-end:** `stop` on a completed run → complete notification; run a
