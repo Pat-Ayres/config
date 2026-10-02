@@ -123,3 +123,4 @@ eval "$(starship init bash)"
 export DOCKER_BUILDKIT=1
 export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
 eval "$(atuin init bash)"
+eval "$(direnv hook bash)"

@@ -76,9 +76,14 @@ PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 # GO Stuff
 export GOPATH=$HOME/go
-export GOROOT=/usr/local/go
 export GOBIN=$GOPATH/bin
-export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+if [ -d /usr/local/go ]; then
+  export GOROOT=/usr/local/go
+  export PATH=$GOROOT/bin:$PATH
+fi
+export PATH=$GOPATH/bin:$PATH
+
+export PATH=$HOME/.cargo/bin:$PATH
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -105,3 +110,4 @@ fi
 
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /Users/payres/.tenv/OpenTofu/1.6.2/tofu tofu
+eval "$(direnv hook zsh)"
