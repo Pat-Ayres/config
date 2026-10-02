@@ -32,6 +32,25 @@
 
     brews = [
       "ruby-install"
+      "openssl@3"
+      "libyaml"
+      "libffi"
+      "readline"
+      "libpq"
+      "freetds"
+      "gnutls"
+      "libsecret"
+      "gdbm"
+      "icu4c@76"
+      "imagemagick"
+      "cairo"
+      "pango"
+      "harfbuzz"
+      "gobject-introspection"
+      "openjpeg"
+      "libheif"
+      "jpeg-xl"
+      "shared-mime-info"
     ];
   };
 }
