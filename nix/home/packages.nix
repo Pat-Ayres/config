@@ -47,6 +47,7 @@ let
     kubectl
     kubernetes-helm
     kubectx
+    krew
     kind
     # minikube bundles its own copy of `kubectl` in its output, which
     # collides with the standalone `kubectl` above when home-manager builds
