@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  imports = [ ./homebrew.nix ./rectangle.nix ];
+  imports = [ ./homebrew.nix ./rectangle.nix ./hotkeys.nix ];
 
   # https://nix-darwin.github.io/nix-darwin/manual/index.html#opt-system.defaults._.GlobalPreferences_._com.apple.mouse.scaling_
   system.defaults = {
