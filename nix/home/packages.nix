@@ -38,6 +38,23 @@ let
     zk
     goreleaser
     gnuplot
+    diffnav
+    bash
+    bats
+    gotop
+    graphviz
+    lua-language-server
+    moreutils
+    protobuf
+    watch
+    wget
+    yamllint
+    redis
+    cmake
+    ninja
+    automake
+    bison
+    gettext
 
     # containers / k8s — colima replaces Docker Desktop, matching current setup
     colima
@@ -64,6 +81,14 @@ let
     sops
     cosign
     hadolint
+    tenv
+    tofu-ls
+    terraform-ls
+    terraform-docs
+    terraformer
+    cmctl
+    eksctl
+    eks-node-viewer
     prometheus
     rbspy
 
