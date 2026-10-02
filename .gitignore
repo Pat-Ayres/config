@@ -4,3 +4,7 @@
 *.zip
 
 zshenv
+
+# nix build output symlinks
+result
+result-*
