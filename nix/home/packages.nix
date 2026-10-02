@@ -28,7 +28,7 @@ let
     bat
     eza
     jq
-    yq
+    yq-go
     tree
     htop
     tokei
