@@ -27,6 +27,8 @@ in
     "karabiner/karabiner.json".source = fromRepo "macos/karabiner.json";
   };
 
+  xdg.dataFile."chruby".source = "${pkgs.chruby}/share/chruby";
+
   home.activation.installTpm = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     tpm="$HOME/.tmux/plugins/tpm"
     if [ ! -d "$tpm" ]; then

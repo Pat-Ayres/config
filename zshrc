@@ -60,8 +60,11 @@ source ~/.zshaliases
 
 eval "$(starship init zsh)"
 
-# chruby - load from system on Linux, brew on macOS
-if [[ "$(uname)" == "Darwin" ]] && [[ -f "$(brew --prefix)/opt/chruby/share/chruby/chruby.sh" ]]; then
+# chruby - nix/home-manager first, then brew on macOS, system on Linux
+if [[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/chruby/chruby.sh" ]]; then
+  source "${XDG_DATA_HOME:-$HOME/.local/share}/chruby/chruby.sh"
+  source "${XDG_DATA_HOME:-$HOME/.local/share}/chruby/auto.sh"
+elif [[ "$(uname)" == "Darwin" ]] && [[ -f "$(brew --prefix)/opt/chruby/share/chruby/chruby.sh" ]]; then
   source "$(brew --prefix)/opt/chruby/share/chruby/chruby.sh"
   source "$(brew --prefix)/opt/chruby/share/chruby/auto.sh"
 elif [[ -f /usr/share/chruby/chruby.sh ]]; then
