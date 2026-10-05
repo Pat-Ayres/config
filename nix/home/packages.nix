@@ -118,6 +118,15 @@ let
     typescript
     typescript-language-server
     yaml-language-server
+    bash-language-server
+    vscode-langservers-extracted
+    dockerfile-language-server
+    sqls
+    marksman
+    taplo
+    lemminx
+    helm-ls
+    regal
 
     pyenv
     uv
