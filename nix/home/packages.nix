@@ -90,10 +90,11 @@ let
     eksctl
     eks-node-viewer
     prometheus
+    prometheus-alertmanager # provides amtool
     rbspy
 
     # go toolchain + go-installed tools (~/go/bin in the inventory)
-    go
+    go_1_27
     gopls
     delve
     gotools
