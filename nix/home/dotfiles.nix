@@ -23,8 +23,6 @@ in
   xdg.configFile = {
     "starship.toml".source = fromRepo "starship.toml";
     "ghostty/config".source = fromRepo "ghostty/config";
-  } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-    "karabiner/karabiner.json".source = fromRepo "macos/karabiner.json";
   };
 
   xdg.dataFile."chruby".source = "${pkgs.chruby}/share/chruby";
