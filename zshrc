@@ -74,7 +74,6 @@ fi
 
 # make gnu-sed the default sed
 PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
-PATH="~/.rd/bin:$PATH"
 PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 # GO Stuff
